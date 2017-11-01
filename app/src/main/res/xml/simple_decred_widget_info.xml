@@ -4,7 +4,7 @@
     android:initialLayout="@layout/simple_decred_widget"
     android:minHeight="40dp"
     android:minWidth="40dp"
-    android:previewImage="@drawable/example_appwidget_preview"
+    android:previewImage="@drawable/widget_preview"
     android:resizeMode="horizontal|vertical"
     android:configure="com.simpledecredwidget.WidgetConfigurator"
     android:updatePeriodMillis="86400000"
