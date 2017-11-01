@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="decredwidget">
+    <!--<ListPreference-->
+        <!--android:defaultValue="3"-->
+        <!--android:dialogTitle="Refresh Interval"-->
+        <!--android:entries="@array/intervals"-->
+        <!--android:entryValues="@array/intervalValues"-->
+        <!--android:key="refresh"-->
+        <!--android:summary="3 minutes"-->
+        <!--android:persistent="false"-->
+        <!--android:title="Refresh Interval" />-->
+    <ListPreference
+        android:defaultValue="0"
+        android:dialogTitle="Widget Type"
+        android:entries="@array/widgetTypes"
+        android:entryValues="@array/widgetTypeValues"
+        android:summary="Decred To Bitcoin"
+        android:key="widgetType"
+        android:persistent="false"
+        android:title="Widget Type" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="icon"
+        android:persistent="false"
+        android:summary="Decred logo would be shown"
+        android:title="Show Decred Logo"/>
+    <ListPreference
+        android:defaultValue="0"
+        android:dialogTitle="Theme"
+        android:entries="@array/themes"
+        android:entryValues="@array/themesValues"
+        android:key="theme"
+        android:summary="Light"
+        android:persistent="false"
+        android:title="Theme" />
+</PreferenceScreen>

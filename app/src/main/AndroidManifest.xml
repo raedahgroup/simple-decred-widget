@@ -2,20 +2,35 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.simpledecredwidget">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <receiver android:name=".DecredToBitcoin">
+        <service
+            android:name=".service.DcrStatsService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <activity
+            android:name=".WidgetConfigurator"
+            android:theme="@style/app_theme"
+            android:label="Widget Configurator">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <receiver android:name=".SimpleDecredWidget" android:label="Decred Widget" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/decred_to_bitcoin_info" />
+                android:resource="@xml/simple_decred_widget_info" />
         </receiver>
     </application>
 
