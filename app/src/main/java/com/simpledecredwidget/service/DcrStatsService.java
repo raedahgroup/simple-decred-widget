@@ -20,6 +20,7 @@ public class DcrStatsService extends IntentService {
     //private final static DcrStatsUrl DCR_STATS_URL = new DcrStatsUrl("http://10.0.2.2:8090");
     private final static int TIMEOUT_MS = 10000;
     private final static int MAX_RETRIES = 0;
+    private int appWidgetId = 0;
 
     public DcrStatsService() {
         super("DcrStatsService");
@@ -27,13 +28,15 @@ public class DcrStatsService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        L.l("Service started");
+        appWidgetId = intent.getExtras().getInt("widgetId");
+        L.l("Service started: "+appWidgetId);
         getStats();
     }
 
     public void sendErrorToWidget() {
         Intent i = new Intent(this.getApplicationContext(),SimpleDecredWidget.class);
         i.setAction(MyIntents.DRAW_ERROR);
+        i.putExtra("appWidgetId",appWidgetId);
         this.getApplicationContext().sendBroadcast(i);
     }
 
@@ -41,6 +44,7 @@ public class DcrStatsService extends IntentService {
         Intent i = new Intent(this.getApplicationContext(), SimpleDecredWidget.class);
         i.setAction(MyIntents.DRAW_STATS);
         i.putExtra("stats", stats);
+        i.putExtra("appWidgetId",appWidgetId);
         this.getApplicationContext().sendBroadcast(i);
     }
 
@@ -51,7 +55,7 @@ public class DcrStatsService extends IntentService {
             new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
-                    L.l("Service received non-error response\n" + response);
+                   L.l("Service received non-error response\n" + response);
                     DcrStats stats = new DcrStats(response);
                     sendStatsToWidget(stats);
                 }
@@ -64,7 +68,6 @@ public class DcrStatsService extends IntentService {
                 sendErrorToWidget();
             }
         });
-
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(
                 TIMEOUT_MS,
                 MAX_RETRIES,

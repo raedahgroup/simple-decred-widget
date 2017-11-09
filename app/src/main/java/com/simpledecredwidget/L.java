@@ -23,7 +23,7 @@ import android.util.Log;
 public class L {
     public static void l(String s) {
         if (s == null) s = "null";
-        Log.e("LOOGGGG", s);
+        //Log.e("LOOGGGG", s);
     }
 }
 

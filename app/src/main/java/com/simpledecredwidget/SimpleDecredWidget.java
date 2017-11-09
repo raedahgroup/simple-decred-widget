@@ -3,6 +3,7 @@ package com.simpledecredwidget;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -31,40 +32,37 @@ public class SimpleDecredWidget extends AppWidgetProvider {
     private final String PREFS_NAME = "com.simpledecredwidget.WidgetConfigurator";
     private final String ACTION_CLICK = "com.simpledecredwidget.CLICK";
     private boolean waitingForService = false;
-    static SparseIntArray widgetWidths = new SparseIntArray();
     private PendingIntent getPendingSelfIntent(Context context, String action, int appWidgetId) {
         Intent intent = new Intent(context, getClass());
         intent.setAction(action);
         intent.putExtra("widgetId", appWidgetId);
-        //L.l("Pending intent returned: "+intent.getIntExtra("widgetId", -1));
+        L.l("Pending intent widgetId: "+appWidgetId);
         return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
-    void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle options) {
+    void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         //L.l("Updating widget");
-        Configuration config = loadConfiguration(context, appWidgetId);
-        if(options != null){
-            int minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
-            int maxWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH);
-            int minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
-            int maxHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
-            widgetWidths.put(appWidgetId, minWidth);
-            //L.l("Min Width: "+minWidth+", Max Width: "+maxWidth+", Min Height: "+minHeight+", Max Height: "+maxHeight+" Context: "+context.getResources().getDimension(R.dimen.forty_dp));
+        if(appWidgetId == 0){
+            return;
         }
+        Configuration config = loadConfiguration(context, appWidgetId);
         RemoteViews views = applyConfiguration(config, context, appWidgetId);
-        views.setOnClickPendingIntent(R.id.simple_decred_widget,getPendingSelfIntent(context,ACTION_CLICK, appWidgetId));
+        L.l("Calling Pending Intent from updateAppWidget: "+appWidgetId);
+        views.setOnClickPendingIntent(R.id.simple_decred_widget,getPendingSelfIntent(context,ACTION_CLICK+""+appWidgetId, appWidgetId));
         views.setTextViewText(R.id.content_text, "--");
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
-    RemoteViews applyConfiguration(Configuration config, Context context, int appWidgetIds){
+    RemoteViews applyConfiguration(Configuration config, Context context, int appWidgetId){
+        L.l("applying config");
         RemoteViews views;
-        int minWidth = widgetWidths.get(appWidgetIds);
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+        int minWidth = prefs.getInt("widgetWidth"+appWidgetId,0);
+        L.l("Widget Width: "+minWidth);
         if(config.theme == 0){
             views = new RemoteViews(context.getPackageName(), R.layout.simple_decred_widget);
         }else{
             views = new RemoteViews(context.getPackageName(), R.layout.simple_decred_widget_dark);
         }
-
         if(config.showLogo){
             if(minWidth <= 71){
                 views.setTextViewTextSize(R.id.content_text,COMPLEX_UNIT_SP,10);
@@ -121,7 +119,7 @@ public class SimpleDecredWidget extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, null);
+            updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 
@@ -135,7 +133,7 @@ public class SimpleDecredWidget extends AppWidgetProvider {
         return configuration;
     }
 
-    void update(Context context, DcrStats stats){
+    void update(Context context, DcrStats stats, int appWidgetId){
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance
                 (context);
         // Uses getClass().getName() rather than MyWidget.class.getName() for
@@ -145,56 +143,57 @@ public class SimpleDecredWidget extends AppWidgetProvider {
                 );
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
                 thisAppWidgetComponentName);
-        for (int appWidgetId : appWidgetIds) {
-            Configuration config = loadConfiguration(context, appWidgetId);
-            RemoteViews views = applyConfiguration(config, context, appWidgetId);
-            views.setOnClickPendingIntent(R.id.simple_decred_widget,getPendingSelfIntent(context, ACTION_CLICK, appWidgetId));
-            L.l("Click listener set for update");
-            switch (config.type){
-                case 0:
-                    //dcr/btc
-                    views.setTextViewText(R.id.content_text, stats.getBtcPrice());
-                    break;
-                case 1:
-                    //dcr/usd
-                    views.setTextViewText(R.id.content_text, stats.getUsdPrice());
-                    break;
-                case 2:
-                    //current
-                    views.setTextViewText(R.id.content_text, stats.getTicketPrice());
-                    break;
-                case 3:
-                    //Change
-                    views.setTextViewText(R.id.content_text, new ChangeTime(stats.getPriceChangeInSeconds()).format());
-                    break;
-                case 4:
-                    //Est. next price
-                    views.setTextViewText(R.id.content_text, stats.getEstNextPrice());
-                    break;
-                case 5:
-                    //difficulty
-                    views.setTextViewText(R.id.content_text, stats.getDifficulty());
-                    break;
-                case 6:
-                    //hash rate
-                    double networkHash = stats.getNetworkHash();
-                    views.setTextViewText(R.id.content_text, new HashRate(networkHash).format());
-                    break;
-            }
-            views.setViewVisibility(R.id.content_text, VISIBLE);
-            views.setViewVisibility(R.id.progressBar, View.GONE);
-            appWidgetManager.updateAppWidget(appWidgetId, views);
+        Configuration config = loadConfiguration(context, appWidgetId);
+        RemoteViews views = applyConfiguration(config, context, appWidgetId);
+        L.l("Calling Pending Intent From update: "+appWidgetId);
+        views.setOnClickPendingIntent(R.id.simple_decred_widget,getPendingSelfIntent(context,ACTION_CLICK+""+appWidgetId, appWidgetId));
+        switch (config.type){
+            case 0:
+                //dcr/btc
+                views.setTextViewText(R.id.content_text, stats.getBtcPrice());
+                break;
+            case 1:
+                //dcr/usd
+                views.setTextViewText(R.id.content_text, stats.getUsdPrice());
+                break;
+            case 2:
+                //current
+                views.setTextViewText(R.id.content_text, stats.getTicketPrice());
+                break;
+            case 3:
+                //Change
+                views.setTextViewText(R.id.content_text, new ChangeTime(stats.getPriceChangeInSeconds()).format());
+                break;
+            case 4:
+                //Est. next price
+                views.setTextViewText(R.id.content_text, stats.getEstNextPrice());
+                break;
+            case 5:
+                //difficulty
+                views.setTextViewText(R.id.content_text, stats.getDifficulty());
+                break;
+            case 6:
+                //hash rate
+                double networkHash = stats.getNetworkHash();
+                views.setTextViewText(R.id.content_text, new HashRate(networkHash).format());
+                break;
         }
+        views.setViewVisibility(R.id.content_text, VISIBLE);
+        views.setViewVisibility(R.id.progressBar, View.GONE);
+        appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
-        updateAppWidget(context,appWidgetManager, appWidgetId, newOptions);
-        sendIntentToService(context);
+        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
+        prefs.putInt("widgetWidth" + appWidgetId, newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH));
+        prefs.commit();
+        updateAppWidget(context,appWidgetManager, appWidgetId);
+        sendIntentToService(context, appWidgetId);
     }
 
-    void error(Context context){
+    void error(Context context, int appWidgetId){
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance
                 (context);
         ComponentName thisAppWidgetComponentName =
@@ -202,43 +201,42 @@ public class SimpleDecredWidget extends AppWidgetProvider {
                 );
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
                 thisAppWidgetComponentName);
-        for (int appWidgetId : appWidgetIds) {
-            Configuration config = loadConfiguration(context, appWidgetId);
-            RemoteViews views = applyConfiguration(config, context, appWidgetId);
-            views.setOnClickPendingIntent(R.id.simple_decred_widget,getPendingSelfIntent(context, ACTION_CLICK,appWidgetId));
-            views.setTextViewText(R.id.content_text, "--");
-            views.setViewVisibility(R.id.content_text, VISIBLE);
-            views.setViewVisibility(R.id.progressBar, View.GONE);
-            appWidgetManager.updateAppWidget(appWidgetId, views);
-        }
+        Configuration config = loadConfiguration(context, appWidgetId);
+        RemoteViews views = applyConfiguration(config, context, appWidgetId);
+        L.l("Calling Pending Intent from error: " + appWidgetId);
+        views.setOnClickPendingIntent(R.id.simple_decred_widget,getPendingSelfIntent(context,ACTION_CLICK+""+appWidgetId, appWidgetId));
+        views.setTextViewText(R.id.content_text, "--");
+//        views.setTextViewText(R.id.content_text, appWidgetId + "");
+        views.setViewVisibility(R.id.content_text, VISIBLE);
+        views.setViewVisibility(R.id.progressBar, View.GONE);
+        appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
     @Override
     public void onReceive(final Context context, Intent intent) {
         super.onReceive(context, intent);
-        //L.l("Intent received: "+intent.getAction());
+        if(intent.getAction().startsWith(ACTION_CLICK)){
+            L.l("CLICK ACTION: "+intent.getAction());
+        }
         if(intent.getAction().equals(MyIntents.UPDATE)){
-            L.l("Updating app widget");
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance
                     (context);
-            ComponentName thisAppWidgetComponentName =
-                    new ComponentName(context.getPackageName(),getClass().getName()
-                    );
-            int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
-                    thisAppWidgetComponentName);
-            for(int appWidgetId : appWidgetIds){
-                updateAppWidget(context, appWidgetManager, appWidgetId, null);
+            int widgetId = intent.getExtras().getInt("widgetId");
+            if(widgetId == AppWidgetManager.INVALID_APPWIDGET_ID){
+                return;
             }
-            sendIntentToService(context);
-        }else if(intent.getAction().equals(ACTION_CLICK)){
-            //L.l("CLICKED Waiting for service: "+waitingForService);
+            L.l("WidgetId FOR UPDATE: "+widgetId);
+            updateAppWidget(context, appWidgetManager, widgetId);
+            sendIntentToService(context, widgetId);
+        }else if(intent.getAction().startsWith(ACTION_CLICK)){
             SharedPreferences preferences = context.getSharedPreferences(PREFS_NAME, 0);
             Bundle b = intent.getExtras();
             if(b == null) {
                 L.l("Bundle is null: " + intent.getIntExtra("widgetId", -1));
                 return;
             }
-            final int widgetId = b.getInt("widgetId");
+            final int widgetId = Integer.parseInt(intent.getAction().replace(ACTION_CLICK,""));
+            L.l("Click Widget ID: "+widgetId);
             Long clickTimer = preferences.getLong("widgetClick"+widgetId, 0);
             if((System.currentTimeMillis() - clickTimer) < 500){
                 SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
@@ -246,6 +244,7 @@ public class SimpleDecredWidget extends AppWidgetProvider {
                 prefs.commit();
                 Intent i = new Intent(context, WidgetConfigurator.class);
                 L.l("Click App Widget ID: "+widgetId);
+                i.putExtra("widgetId", widgetId);
                 i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
                 context.startActivity(i);
             }else {
@@ -261,7 +260,7 @@ public class SimpleDecredWidget extends AppWidgetProvider {
                             Looper.prepare();
                             System.out.println((System.currentTimeMillis() - clickTimer)+" click timer");
                             if ((System.currentTimeMillis() - clickTimer) > 500) {
-                                sendIntentToService(context);
+                                sendIntentToService(context, widgetId);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -269,47 +268,42 @@ public class SimpleDecredWidget extends AppWidgetProvider {
                     }
                 }.start();
             }
-            //sendIntentToService(context);
-            //L.l("Sent intent to service");
         }else if(MyIntents.DRAW_STATS.equals(intent.getAction())){
             waitingForService =  false;
-            L.l("STATS RECEIVED, Drawing stats");
             Bundle b = intent.getExtras();
             DcrStats dcrStats = b.getParcelable("stats");
-            update(context, dcrStats);
+            int appWidgetId = b.getInt("appWidgetId");
+            update(context, dcrStats, appWidgetId);
         }else if(MyIntents.DRAW_ERROR.equals(intent.getAction())){
             waitingForService =  false;
-            //L.l("Error received, drawing error stat");
-            error(context);
+            int appWidgetId = intent.getExtras().getInt("appWidgetId");
+            error(context, appWidgetId);
         }
     }
 
-    void showProgressBar(Context context){
+    void showProgressBar(Context context, int appWidgetId){
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance
                 (context);
-        // Uses getClass().getName() rather than MyWidget.class.getName() for
-        // portability into any App Widget Provider Class
         ComponentName thisAppWidgetComponentName =
                 new ComponentName(context.getPackageName(),getClass().getName()
                 );
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
                 thisAppWidgetComponentName);
-        for (int appWidgetId : appWidgetIds) {
             Configuration config = loadConfiguration(context, appWidgetId);
-            RemoteViews views = applyConfiguration(config,context, appWidgetId);
-            views.setOnClickPendingIntent(R.id.simple_decred_widget,getPendingSelfIntent(context, ACTION_CLICK, appWidgetId));
-            L.l("Click listener set for progressbar");
+            RemoteViews views = applyConfiguration(config, context, appWidgetId);
+            L.l("Calling Pending intent from showProgressBar:" + appWidgetId);
+            views.setOnClickPendingIntent(R.id.simple_decred_widget,getPendingSelfIntent(context,ACTION_CLICK+""+appWidgetId, appWidgetId));
             views.setViewVisibility(R.id.content_text, View.GONE);
             views.setViewVisibility(R.id.progressBar, VISIBLE);
             appWidgetManager.updateAppWidget(appWidgetId, views);
-        }
     }
 
-    private void sendIntentToService(Context context) {
+    private void sendIntentToService(Context context, int appWidgetId) {
         if (!waitingForService) {
             waitingForService = true;
-            showProgressBar(context);
+            showProgressBar(context, appWidgetId);
             Intent msgIntent = new Intent(context, DcrStatsService.class);
+            msgIntent.putExtra("widgetId", appWidgetId);
             msgIntent.setAction(MyIntents.GET_STATS);
             context.startService(msgIntent);
         }else{

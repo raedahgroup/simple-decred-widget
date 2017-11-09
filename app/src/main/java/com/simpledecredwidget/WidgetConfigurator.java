@@ -73,10 +73,10 @@ public class WidgetConfigurator extends PreferenceActivity {
         prefs.putBoolean(appWidgetId+"logo",icon.isChecked());
         prefs.putInt(appWidgetId+"theme", Integer.valueOf(theme.getValue()));
         prefs.commit();
-        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, 0);
-        L.l("Theme Type: "+preferences.getInt(appWidgetId+"theme", -1)+" Widget Id: "+appWidgetId);
+        L.l("Saving widget configuration: "+appWidgetId);
         Intent intent = new Intent(this, SimpleDecredWidget.class);
         intent.setAction(MyIntents.UPDATE);
+        intent.putExtra("widgetId",appWidgetId);
         sendBroadcast(intent);
         Intent resultValue = new Intent();
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
