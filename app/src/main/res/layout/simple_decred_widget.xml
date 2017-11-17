@@ -10,7 +10,7 @@
         android:layout_height="@dimen/image_width"
         android:src="@drawable/decred_symbol"
         android:id="@+id/currency_icon"
-        android:visibility="gone"
+        android:visibility="visible"
         android:cropToPadding="true"
         android:layout_centerVertical="true"
         />
@@ -20,7 +20,7 @@
         android:src="@drawable/decred_symbol"
         android:id="@+id/currency_icon_small"
         android:cropToPadding="true"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         />

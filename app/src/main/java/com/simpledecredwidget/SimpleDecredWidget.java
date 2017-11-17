@@ -65,26 +65,39 @@ public class SimpleDecredWidget extends AppWidgetProvider {
         }
         if(config.showLogo){
             if(minWidth <= 71){
-                views.setTextViewTextSize(R.id.content_text,COMPLEX_UNIT_SP,10);
+                if(config.type == 5){
+                    views.setTextViewTextSize(R.id.content_text,COMPLEX_UNIT_SP,15);
+                }else{
+                    views.setTextViewTextSize(R.id.content_text,COMPLEX_UNIT_SP,20);
+                }
                 views.setViewVisibility(R.id.currency_icon_small, VISIBLE);
                 views.setViewVisibility(R.id.currency_icon, INVISIBLE);
             }else{
                 views.setViewVisibility(R.id.currency_icon_small, INVISIBLE);
                 views.setViewVisibility(R.id.currency_icon, VISIBLE);
-                views.setTextViewTextSize(R.id.content_text,COMPLEX_UNIT_SP,20);
+                if(config.type == 5){
+                    views.setTextViewTextSize(R.id.content_text,COMPLEX_UNIT_SP,25);
+                }else{
+                    views.setTextViewTextSize(R.id.content_text,COMPLEX_UNIT_SP,30);
+                }
             }
         }else{
             views.setViewVisibility(R.id.currency_icon, View.GONE);
             views.setViewVisibility(R.id.currency_icon_small, View.GONE);
+            if(config.type == 5){
+                views.setTextViewTextSize(R.id.content_text,COMPLEX_UNIT_SP,25);
+            }else{
+                views.setTextViewTextSize(R.id.content_text,COMPLEX_UNIT_SP,30);
+            }
         }
         switch (config.type){
             case 0:
                 views.setViewVisibility(R.id.top_text, View.GONE);
-                views.setTextViewText(R.id.bottom_text,"DCR/BTC");
+                views.setTextViewText(R.id.bottom_text,"BTC/DCR");
                 break;
             case 1:
                 views.setViewVisibility(R.id.top_text, View.GONE);
-                views.setTextViewText(R.id.bottom_text,"DCR/USD");
+                views.setTextViewText(R.id.bottom_text,"USD/DCR");
                 break;
             case 2:
                 views.setViewVisibility(R.id.top_text, VISIBLE);
@@ -154,7 +167,7 @@ public class SimpleDecredWidget extends AppWidgetProvider {
                 break;
             case 1:
                 //dcr/usd
-                views.setTextViewText(R.id.content_text, stats.getUsdPrice());
+                views.setTextViewText(R.id.content_text, "$"+stats.getUsdPrice());
                 break;
             case 2:
                 //current
@@ -246,6 +259,7 @@ public class SimpleDecredWidget extends AppWidgetProvider {
                 L.l("Click App Widget ID: "+widgetId);
                 i.putExtra("widgetId", widgetId);
                 i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(i);
             }else {
                 new Thread() {
@@ -299,15 +313,11 @@ public class SimpleDecredWidget extends AppWidgetProvider {
     }
 
     private void sendIntentToService(Context context, int appWidgetId) {
-        if (!waitingForService) {
-            waitingForService = true;
-            showProgressBar(context, appWidgetId);
-            Intent msgIntent = new Intent(context, DcrStatsService.class);
-            msgIntent.putExtra("widgetId", appWidgetId);
-            msgIntent.setAction(MyIntents.GET_STATS);
-            context.startService(msgIntent);
-        }else{
-            L.l("Waiting for service, NOT Going");
-        }
+        waitingForService = true;
+        showProgressBar(context, appWidgetId);
+        Intent msgIntent = new Intent(context, DcrStatsService.class);
+        msgIntent.putExtra("widgetId", appWidgetId);
+        msgIntent.setAction(MyIntents.GET_STATS);
+        context.startService(msgIntent);
     }
 }
