@@ -1,0 +1,21 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.brentpanther.cryptowidget" android:installLocation="internalOnly">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-feature android:name="android.software.app_widgets" />
+
+    <application>
+        <activity
+            android:name=".SettingsActivity"
+            android:noHistory="true"
+            android:theme="@style/app_theme">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <service android:name="com.brentpanther.cryptowidget.BackgroundService" />
+        <receiver android:name="com.brentpanther.cryptowidget.PriceBroadcastReceiver" />
+
+    </application>
+
+</manifest>

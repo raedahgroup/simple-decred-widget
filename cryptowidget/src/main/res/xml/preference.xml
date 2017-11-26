@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="decredwidget">
+    <ListPreference
+        android:defaultValue="0"
+        android:dialogTitle="Widget Type"
+        android:entries="@array/widgetTypes"
+        android:entryValues="@array/widgetTypeValues"
+        android:summary="Price - Decred To Bitcoin"
+        android:key="widgetType"
+        android:persistent="false"
+        android:title="Widget Type" />
+    <ListPreference
+        android:defaultValue="30"
+        android:dialogTitle="Refresh Interval"
+        android:entries="@array/intervals"
+        android:entryValues="@array/intervalValues"
+        android:key="refresh"
+        android:summary="30 Minutes"
+        android:persistent="false"
+        android:title="Refresh Interval" />
+    <ListPreference
+        android:defaultValue="0"
+        android:dialogTitle="Theme"
+        android:entries="@array/themes"
+        android:entryValues="@array/themesValues"
+        android:key="theme"
+        android:summary="Light"
+        android:persistent="false"
+        android:title="Theme" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="icon"
+        android:persistent="false"
+        android:summary="Decred logo would be shown"
+        android:title="Show Decred Logo"/>
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="label"
+        android:persistent="false"
+        android:summary="Labels would be shown"
+        android:title="Show Labels"/>
+    <ListPreference
+        android:defaultValue="0"
+        android:dialogTitle="Data Source"
+        android:entries="@array/dataSources"
+        android:entryValues="@array/dataSourcesValues"
+        android:summary="Dcrstats"
+        android:key="data_source"
+        android:persistent="false"
+        android:title="Data Source" />
+    <Preference
+        android:persistent="false"
+        android:summary="Single tap to refresh.\nDouble tap to reconfigure.\nLong touch to resize."
+        android:title="Instructions" />
+</PreferenceScreen>
