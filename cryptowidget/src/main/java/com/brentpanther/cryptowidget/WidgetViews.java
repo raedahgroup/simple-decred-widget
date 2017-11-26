@@ -67,17 +67,17 @@ class WidgetViews {
                 labelText = "USD/DCR";
                 break;
             case 2:
-                views.setTextViewText(ids.topText(),"PoS Ticket Price");
-                topText = "PoS Ticket Price";
+                views.setTextViewText(ids.topText(),"PoS Ticket");
+                topText = "PoS Ticket";
                 labelText = "CURRENT";
                 break;
             case 3:
-                topText = "PoS Ticket Price";
+                topText = "PoS Ticket";
                 labelText = "EST. NEXT PRICE";
                 break;
             case 4:
-                topText = "PoS Ticket Price";
-                labelText = "CHANGE";
+                topText = "PoS Ticket";
+                labelText = "NEXT WINDOW";
                 break;
             case 5:
                 topText = "PoW Network";
