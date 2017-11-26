@@ -69,7 +69,7 @@ class WidgetViews {
             case 2:
                 views.setTextViewText(ids.topText(),"PoS Ticket");
                 topText = "PoS Ticket";
-                labelText = "CURRENT";
+                labelText = "CURRENT PRICE";
                 break;
             case 3:
                 topText = "PoS Ticket";
