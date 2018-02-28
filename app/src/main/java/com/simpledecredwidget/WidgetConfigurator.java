@@ -1,8 +1,10 @@
 package com.simpledecredwidget;
 
 import android.appwidget.AppWidgetManager;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -91,6 +93,17 @@ public class WidgetConfigurator extends PreferenceActivity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     preference.setSummary(getResources().getStringArray(R.array.themes)[Integer.valueOf(newValue.toString())]);
+                    return true;
+                }
+            });
+            findPreference("source").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/C-ollins/Simple-Decred-Widget")));
+                    } catch (ActivityNotFoundException anfe) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/C-ollins/Simple-Decred-Widget")));
+                    }
                     return true;
                 }
             });

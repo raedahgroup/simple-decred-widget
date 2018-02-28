@@ -53,4 +53,8 @@
         android:persistent="false"
         android:summary="Single tap to refresh.\nDouble tap to reconfigure.\nLong touch to resize."
         android:title="Instructions" />
+    <Preference
+        android:key="source"
+        android:persistent="false"
+        android:title="View source code on github" />
 </PreferenceScreen>
